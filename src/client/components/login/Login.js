@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import C_Button from "../button/C_Button";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { firebase, auth } from '../../../serveice/Firebase'
+import { firebase, auth } from '../../../service/Firebase'
 
 export default function Login() {
 
