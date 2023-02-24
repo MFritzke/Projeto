@@ -7,10 +7,9 @@ export default function C_Button(props) {
         props.onClick(e);
     }
 
-
     return (
         <div>
-            <button onClick={(e)=> onClick(e)} name={props.name} class="defaultButton" role="button">{props.label}</button>
+            <button disabled={props.disabled} onClick={(e)=> onClick(e)} name={props.name} class="defaultButton" role="button">{props.label}</button>
         </div>
     )
 };

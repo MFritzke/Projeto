@@ -1,47 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import C_Button from "../button/C_Button";
-import C_TextField from "../textField/C_TextField";
-import api from "../../../Api";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Link } from 'react-router-dom'
-import Tela from "../../../pages/Tela";
+import { firebase, auth } from '../../../serveice/Firebase'
 
 export default function Login() {
 
-    const [user, setUser] = useState(undefined);
-    const [password, setPass] = useState(undefined);
-    const [inputError, setInputError] = useState(undefined);
-    const [inputErrorMessage, setInputErrorMessage] = useState(undefined);
-    const [next, showNext] = useState(false);
+    const [user, setUser] = useState();
+    useEffect(() => {
 
-    function onChange(e) {
-        setInputError(false);
-        if (e.target.name === "user") {
-            setUser(e.target.value);
-        }
-        if (e.target.name === "password") {
-            setPass(e.target.value);
-        }
-    }
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                const { uid, displayName, photoURL, email } = user;
 
-    function Login_(e) {
-
-        if (!user || !password) {
-            setInputError(true);
-            return setInputErrorMessage("Todos os campos devem ser preenchidos corretamente.");
-        }
-
-        const data = {
-            user,
-            password
-        };
-
-        api.post('login', data).then(res => {
-            console.log("🥶 --> file: Login.js:39 --> api.post --> res:", res)
-
-            if (res?.data?.Error) {
-                return toast.error(res.data.Error, {
+                setUser({
+                    id: uid,
+                    avatar: photoURL,
+                    name: displayName,
+                    email
+                })
+                console.log(user);
+                return toast.success("Login efetuado com sucesso!", {
+                    position: "bottom-center",
+                    autoClose: 800,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: false,
+                    theme: "colored",
+                })
+            } else {
+                return toast.warn("Sessão não iniciada, favor efetuar o login", {
                     position: "bottom-center",
                     autoClose: 3000,
                     hideProgressBar: true,
@@ -50,10 +40,41 @@ export default function Login() {
                     draggable: true,
                     progress: false,
                     theme: "colored",
-                });
+                })
             }
+        })
+    }, [])
+
+    const googleLogin = async () => {
+
+        const provider = new firebase.auth.GoogleAuthProvider;
+
+        const result = await auth.signInWithPopup(provider);
+
+        if (result.user) {
+
+            const { uid, displayName, photoURL, email } = result.user;
+
+            setUser({
+                id: uid,
+                avatar: photoURL,
+                name: displayName,
+                email
+            })
+            console.log(user);
 
             toast.success("Login efetuado com sucesso!", {
+                position: "bottom-center",
+                autoClose: 800,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: false,
+                theme: "colored",
+            })
+        } else {
+            toast.warn("Sessão não iniciada, favor efetuar o login", {
                 position: "bottom-center",
                 autoClose: 3000,
                 hideProgressBar: true,
@@ -63,8 +84,8 @@ export default function Login() {
                 progress: false,
                 theme: "colored",
             })
-        });
-    }
+        }
+    };
 
     return (
         <div style={{ width: "100%", height: "100vh", display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", backgroundColor: "#e5e5e5" }} >
@@ -74,12 +95,8 @@ export default function Login() {
                         BEM VINDO AO SISTEMA
                     </p>
                 </div>
-                <div style={{ alignItems: "center", display: "flex", flexDirection: "column", marginTop: "10%" }}>
-                    <C_TextField label="Usuário" id="user" required name="user" onChange={(e) => { onChange(e) }} />
-                    <C_TextField error={inputError ? inputErrorMessage : undefined} label="Senha" id="password" required name="password" type="password" onChange={(e) => { onChange(e) }} />
-                </div>
-                <div style={{ display: "flex", justifyContent: "flex-end", marginTop: inputError ? "22.2%" : "25%", marginRight: 4 }}>
-                    <C_Button label="Login" onClick={Login_} name="loginButton" />
+                <div style={{ display: "flex", justifyContent: "center", justifyContent: "center", height: "65%", alignItems: "center" }}>
+                    <C_Button label="Login with GOOGLE" onClick={googleLogin} name="loginButton" />
                 </div>
             </div>
             <ToastContainer />
